@@ -32,7 +32,7 @@ public class GraphApp {
 
                 addNode(src); //add node and add edge for feature 2/3 later on.
                 addNode(dst);
-                addEdge(src, dst);
+                addEdge(src, dst); //add edge for later in feature 3 next
             }
 
             else if (line.matches("[a-zA-Z0-9_]+;")) {
@@ -59,9 +59,25 @@ public class GraphApp {
         Files.writeString(Paths.get(filepath), toString());
     }
 
+    public void addNode(String label) {
+        if (!graph.containsVertex(label)) {
+            graph.addVertex(label);
+        }
+        else {
+            System.out.println("duplicate-" + label); //check for duplicates in nodes
+        }
+    }
+
+    public void addNodes(String[] labels) {
+        for (String label : labels) {
+            addNode(label); //reuse addNode
+        }
+    }
 
     public static void main(String[] args) throws IOException {
         GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"A", "B", "C"}); //example DOT graph to be tested using main
 
     }
 }
