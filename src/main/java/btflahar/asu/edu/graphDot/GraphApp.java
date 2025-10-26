@@ -68,6 +68,38 @@ public class GraphApp {
         }
     }
 
+    public void outputDOTGraph(String path) throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path))) {
+            writer.write("digraph G {\n");
+            for (String v : graph.vertexSet()) {
+                writer.write("  " + v + ";\n");
+            }
+            for (DefaultEdge e : graph.edgeSet()) {
+                String src = graph.getEdgeSource(e);
+                String dst = graph.getEdgeTarget(e);
+                writer.write("  " + src + " -> " + dst + ";\n");
+            }
+            writer.write("}\n");
+        }
+    }
+
+
+    public void outputGraphics(String path, String format) throws IOException {
+
+        if (!format.equalsIgnoreCase("png")) {
+            throw new IllegalArgumentException("error, invalid format for graph");
+        }
+
+        Path tempDot = Files.createTempFile("graph", ".dot");
+        outputDOTGraph(tempDot.toString());
+
+
+        Graphviz.fromFile(tempDot.toFile()) //use graphViz function to create from png
+                .render(Format.PNG)
+                .toFile(new File(path));
+        Files.deleteIfExists(tempDot);
+    }
+
 
     @Override
     public String toString() {
@@ -100,6 +132,12 @@ public class GraphApp {
 
         String outPng = "C:/Users/brady/Desktop/input.png";
 
+        app.outputDOTGraph(outDot);
+        app.outputGraphics(outPng, "png");
+
+        System.out.println("DOT graph created and written to: " + outDot + " exists at" + Files.exists(Paths.get(outDot)));
+        System.out.println("PNG  written to: " + outPng + " exists at" + Files.exists(Paths.get(outPng)));
+        System.out.println(app);
 
     }
 }
