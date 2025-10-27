@@ -83,6 +83,36 @@ public class GraphApp {
         }
     }
 
+    public void outputDOTGraph(String path) throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path))) {
+            writer.write("digraph G {\n");
+            for (String v : graph.vertexSet()) {
+                writer.write("  " + v + ";\n");
+            }
+            for (DefaultEdge e : graph.edgeSet()) {
+                String src = graph.getEdgeSource(e);
+                String dst = graph.getEdgeTarget(e);
+                writer.write("  " + src + " -> " + dst + ";\n");
+            }
+            writer.write("}\n");
+        }
+    }
+
+
+    public void outputGraphics(String path, String format) throws IOException {
+
+        if (!format.equalsIgnoreCase("png")) {
+            throw new IllegalArgumentException("PNG only");
+        }
+
+        Path tDot = Files.createTempFile("graph", ".dot"); //temp DOT file for base template
+        outputDOTGraph(tDot.toString());
+
+        Graphviz.fromFile(tDot.toFile())
+                .render(Format.PNG)
+                .toFile(new File(path));
+        Files.deleteIfExists(tDot); //graphViz renders png form tempDot
+    }
 
 
     public static void main(String[] args) throws IOException {
@@ -91,6 +121,8 @@ public class GraphApp {
         app.addNodes(new String[]{"A", "B", "C"}); //example DOT graph to be tested using main
         app.addEdge("A", "B");
         app.addEdge("B", "C"); //add edges for test
+        app.outputDOTGraph("example.dot");
+        app.outputGraphics("example.png", "png"); //have example.dot and example output to see if features works
         System.out.println(app);
     }
 }
