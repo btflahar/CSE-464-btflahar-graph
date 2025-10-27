@@ -74,10 +74,23 @@ public class GraphApp {
         }
     }
 
+    public void addEdge(String srcLabel, String dstLabel) {
+        if (graph.containsEdge(srcLabel, dstLabel)) {
+            System.out.println("duplicate-" + srcLabel + " -> " + dstLabel); //duplicate check
+        }
+        else {
+            graph.addEdge(srcLabel, dstLabel);
+        }
+    }
+
+
+
     public static void main(String[] args) throws IOException {
         GraphApp app = new GraphApp();
 
         app.addNodes(new String[]{"A", "B", "C"}); //example DOT graph to be tested using main
-
+        app.addEdge("A", "B");
+        app.addEdge("B", "C"); //add edges for test
+        System.out.println(app);
     }
 }
