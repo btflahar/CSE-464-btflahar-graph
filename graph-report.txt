@@ -1,0 +1,4 @@
+Nodes: 4
+Edges: 2
+A -> B
+B -> C

@@ -63,9 +63,7 @@ public class GraphApp {
         if (!graph.containsVertex(label)) {
             graph.addVertex(label);
         }
-        else {
-            System.out.println("duplicate-" + label); //check for duplicates in nodes
-        }
+        // else: duplicate
     }
 
     public void addNodes(String[] labels) {
@@ -75,12 +73,10 @@ public class GraphApp {
     }
 
     public void addEdge(String srcLabel, String dstLabel) {
-        if (graph.containsEdge(srcLabel, dstLabel)) {
-            System.out.println("duplicate-" + srcLabel + " -> " + dstLabel); //duplicate check
-        }
-        else {
+        if (!graph.containsEdge(srcLabel, dstLabel)) {
             graph.addEdge(srcLabel, dstLabel);
         }
+        // else: duplicate
     }
 
     public void outputDOTGraph(String path) throws IOException {
@@ -118,11 +114,16 @@ public class GraphApp {
     public static void main(String[] args) throws IOException {
         GraphApp app = new GraphApp();
 
-        app.addNodes(new String[]{"A", "B", "C"}); //example DOT graph to be tested using main
-        app.addEdge("A", "B");
-        app.addEdge("B", "C"); //add edges for test
-        app.outputDOTGraph("example.dot");
-        app.outputGraphics("example.png", "png"); //have example.dot and example output to see if features works
-        System.out.println(app);
+        String inputDotF  = (args.length >= 1) ? args[0] : "input.dot";
+        String outputPngF = (args.length >= 2) ? args[1] : "input.png";
+
+        app.parseGraph(inputDotF);
+        System.out.println(app.toString()); //.toString print in terminal
+        app.outputGraph("graph-report.txt"); //output to graph file
+        app.outputDOTGraph("input.dot");
+        app.outputGraphics(outputPngF, "png");
+
+        System.out.println("dot file path -> " + Paths.get("input.dot").toAbsolutePath());
+        System.out.println("png file path -> " + Paths.get(outputPngF).toAbsolutePath());
     }
 }

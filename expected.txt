@@ -1,0 +1,4 @@
+Nodes: 3
+Edges: 2
+X -> Y
+Y -> Z
