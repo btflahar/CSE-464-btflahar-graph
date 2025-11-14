@@ -142,7 +142,7 @@ class GraphAppTest {
         Path actual = tmp.resolve("graph-report.txt");
         app.outputGraph(actual.toString());
 
-        String expected = Files.readString(Path.of("expected.txt.")); //match expected.txt file
+        String expected = Files.readString(Path.of("expected.txt")); //match expected.txt file
         String got = Files.readString(actual);
 
         assertEquals(expected.replace("\r\n","\n").trim(),
