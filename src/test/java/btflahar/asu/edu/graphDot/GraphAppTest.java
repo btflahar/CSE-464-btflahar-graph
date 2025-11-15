@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.NoSuchElementException;
 
 class GraphAppTest {
 
@@ -147,5 +148,56 @@ class GraphAppTest {
 
         assertEquals(expected.replace("\r\n","\n").trim(),
                 got.replace("\r\n","\n").trim());
+    }
+
+
+    @Test
+    void someRemovedCorrectly() { //SCENARIO 1
+        GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"A","B","C","D"});
+        app.addEdge("A","B");
+        app.addEdge("B","C");
+        app.addEdge("C","D");
+
+
+        app.removeNode("A"); //test removeNode
+        app.removeEdge("B","C"); //test removeEdge
+
+        String out = app.toString();
+
+        //only c-> should remain and 3 nodes (B, C, D)
+        assertTrue(out.contains("Nodes: 3"), out);
+        assertTrue(out.contains("Edges: 1"), out);
+        assertFalse(out.contains("A -> B"), out);
+        assertFalse(out.contains("B -> C"), out);
+        assertTrue(out.contains("C -> D"), out);
+    }
+
+    @Test
+    void scenario2_throwsException() { //SCENARIO 2
+        GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"M","N", "O"});
+
+        assertThrows(NoSuchElementException.class, //test removal of node that doesn't exist
+                () -> app.removeNode("A"));
+
+        assertThrows(NoSuchElementException.class,
+                () -> app.removeNodes(new String[]{"M","A"})); //test removal of one correct node and one incorrect
+    }
+
+    @Test
+    void scenario3_throwsException() { //SCENARIO 3
+        GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"X","Y","Z"});
+        app.addEdge("X","Y");
+
+        assertThrows(NoSuchElementException.class,
+                () -> app.removeEdge("Y","Z")); //remove edge that was never there
+
+        assertThrows(NoSuchElementException.class,
+                () -> app.removeEdge("X","Z")); //remove edge with incorrect end node
     }
 }

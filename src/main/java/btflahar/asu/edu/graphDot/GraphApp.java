@@ -79,6 +79,36 @@ public class GraphApp {
         // else: duplicate
     }
 
+    public void removeNode(String label) {
+        if (!graph.containsVertex(label)) {
+            throw new NoSuchElementException("No node named - " + label); //in case of non-exist
+        }
+        graph.removeVertex(label);
+    }
+
+    public void removeNodes(String[] labels) {
+        for (String s : labels) {
+            if (!graph.containsVertex(s)) {
+                throw new NoSuchElementException("No node named - " + s); //in case of non-exist
+            }
+        }
+        for (String s : labels) {
+            graph.removeVertex(s);
+        }
+    }
+
+    public void removeEdge(String srcLabel, String dstLabel) {
+        if (!graph.containsVertex(srcLabel) || !graph.containsVertex(dstLabel)) {
+            throw new NoSuchElementException("Endpoint node missing for edge: " + srcLabel + " -> " + dstLabel);
+        }
+        DefaultEdge n = graph.getEdge(srcLabel, dstLabel);
+
+        if (n == null) {
+            throw new NoSuchElementException("No edge with -  " + srcLabel + " -> " + dstLabel);
+        }
+        graph.removeEdge(n);
+    }
+
     public void outputDOTGraph(String path) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path))) {
             writer.write("digraph G {\n");
