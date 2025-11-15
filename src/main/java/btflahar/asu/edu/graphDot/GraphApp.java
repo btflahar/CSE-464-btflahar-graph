@@ -109,6 +109,70 @@ public class GraphApp {
         graph.removeEdge(n);
     }
 
+    public Path graphSearch(String nodeSrc, String nodeDst) {
+        if (!graph.containsVertex(nodeSrc) || !graph.containsVertex(nodeDst)) {
+            return null; //if neither node is missing we can return null
+        }
+
+        if (nodeSrc.equals(nodeDst)) {
+            return new Path(List.of(nodeSrc));
+        }
+
+
+        java.util.Queue<String> queue = new java.util.ArrayDeque<>();
+
+        java.util.Map<String, String> parent = new java.util.HashMap<>(); //BFS
+
+        java.util.Set<String> visited = new java.util.HashSet<>(); //BFS
+
+        queue.add(nodeSrc);
+        visited.add(nodeSrc);
+
+        boolean found = false;
+
+        while (!queue.isEmpty()) {
+            String current = queue.remove();
+
+            if (current.equals(nodeDst)) {
+                found = true; //set found to true
+                break;
+            }
+
+            for (DefaultEdge edge1 : graph.outgoingEdgesOf(current)) {
+                String endEdge = graph.getEdgeTarget(edge1);
+
+                if (!visited.contains(endEdge)) {
+                    visited.add(endEdge);
+                    parent.put(endEdge, current);
+                    queue.add(endEdge);
+                }
+            }
+        }
+
+        if (!found) {
+            return null; //return null if found is never set to true
+        }
+
+
+        java.util.List<String> nodes = new java.util.ArrayList<>(); //reconstruct path using map
+
+        String next = nodeDst;
+        nodes.add(next);
+
+        while (!next.equals(nodeSrc)) {
+            next = parent.get(next);
+
+            if (next == null) {
+                return null; //null just in case
+            }
+            nodes.add(next);
+        }
+
+        java.util.Collections.reverse(nodes);
+
+        return new Path(nodes);
+    }
+
     public void outputDOTGraph(String path) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path))) {
             writer.write("digraph G {\n");
@@ -131,7 +195,7 @@ public class GraphApp {
             throw new IllegalArgumentException("PNG only");
         }
 
-        Path tDot = Files.createTempFile("graph", ".dot"); //temp DOT file for base template
+        java.nio.file.Path tDot = Files.createTempFile("graph", ".dot"); //temp DOT file for base template
         outputDOTGraph(tDot.toString());
 
         Graphviz.fromFile(tDot.toFile())

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assumptions;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.NoSuchElementException;
@@ -199,5 +200,34 @@ class GraphAppTest {
 
         assertThrows(NoSuchElementException.class,
                 () -> app.removeEdge("X","Z")); //remove edge with incorrect end node
+    }
+
+    @Test
+    void graphSearchBfs() {
+        GraphApp app = new GraphApp();
+        app.addNodes(new String[]{"A","B","C","D"});
+
+
+        app.addEdge("A","B");
+        app.addEdge("B","C"); //add 3 edges for test
+        app.addEdge("C","D");
+
+        btflahar.asu.edu.graphDot.Path path = app.graphSearch("A","D"); //path for all edges
+
+        assertNotNull(path, "Path A->D is valid"); //valid test path
+        assertEquals(List.of("A","B","C","D"), path.getNodes());
+        assertEquals("A -> B -> C -> D", path.toString());
+    }
+
+    @Test
+    void graphSearchBfsNullNoPath() {
+        GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"A","B","C","D"});
+        app.addEdge("A","B");   // no edges to C/D
+
+        btflahar.asu.edu.graphDot.Path path = app.graphSearch("A","D");
+
+        assertNull(path, "Path A->D should be null");
     }
 }
