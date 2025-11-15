@@ -18,6 +18,6 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
-cd 
+
       - name: Build with Maven
         run: mvn -B clean package
