@@ -10,6 +10,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.NoSuchElementException;
+import java.util.List;
 
 class GraphAppTest {
 
@@ -199,5 +200,33 @@ class GraphAppTest {
 
         assertThrows(NoSuchElementException.class,
                 () -> app.removeEdge("X","Z")); //remove edge with incorrect end node
+    }
+
+    @Test
+    void graphSearchDfsExist() {
+        GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"W","X","Y","Z"});
+        app.addEdge("W","X");
+        app.addEdge("X","Y");
+        app.addEdge("Y","Z");
+
+        btflahar.asu.edu.graphDot.Path path = app.graphSearch("W","Z");
+
+        assertNotNull(path, "Path W->Z is valid");
+        assertEquals(List.of("W","X","Y","Z"), path.getNodes());
+        assertEquals("W -> X -> Y -> Z", path.toString());
+    }
+
+    @Test
+    void graphSearchDfsNullPath() {
+        GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"W","X","Y","Z"});
+        app.addEdge("W","X"); // No edges for Z
+
+        btflahar.asu.edu.graphDot.Path path = app.graphSearch("W","Z");
+
+        assertNull(path, "Path W->Z should be null");
     }
 }

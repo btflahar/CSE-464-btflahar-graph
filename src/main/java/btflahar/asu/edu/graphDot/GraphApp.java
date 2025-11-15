@@ -131,13 +131,72 @@ public class GraphApp {
             throw new IllegalArgumentException("PNG only");
         }
 
-        Path tDot = Files.createTempFile("graph", ".dot"); //temp DOT file for base template
+        java.nio.file.Path tDot = Files.createTempFile("graph", ".dot"); //temp DOT file for base template
         outputDOTGraph(tDot.toString());
 
         Graphviz.fromFile(tDot.toFile())
                 .render(Format.PNG)
                 .toFile(new File(path));
         Files.deleteIfExists(tDot); //graphViz renders png form tempDot
+    }
+
+    public Path graphSearch(String srcLabel, String dstLabel) {
+        if (!graph.containsVertex(srcLabel) || !graph.containsVertex(dstLabel)) {
+            return null; //return null
+        }
+
+        if (srcLabel.equals(dstLabel)) {
+            return new Path(List.of(srcLabel));
+        }
+
+        java.util.Set<String> visited = new java.util.HashSet<>();
+
+        java.util.Map<String, String> parent = new java.util.HashMap<>();
+
+        boolean found = dfsPath(srcLabel, dstLabel, visited, parent);
+
+        if (!found) {
+            return null;
+        }
+
+        java.util.List<String> nodes = new java.util.ArrayList<>();
+        String next = dstLabel;
+        nodes.add(next);
+
+        while (!next.equals(srcLabel)) {
+            next = parent.get(next);
+
+            if (next == null) {
+                return null;
+            }
+            nodes.add(next);
+        }
+
+        java.util.Collections.reverse(nodes);
+        return new Path(nodes);
+    }
+
+    private boolean dfsPath(String current,
+                             String dstLabel,
+                             java.util.Set<String> visited,
+                             java.util.Map<String, String> parent) {
+        visited.add(current);
+        if (current.equals(dstLabel)) {
+            return true;
+        }
+
+        for (DefaultEdge e : graph.outgoingEdgesOf(current)) {
+            String partner = graph.getEdgeTarget(e);
+
+            if (!visited.contains(partner)) {
+                parent.put(partner, current);
+
+                if (dfsPath(partner, dstLabel, visited, parent)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
