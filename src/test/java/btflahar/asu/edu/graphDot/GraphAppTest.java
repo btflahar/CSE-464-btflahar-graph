@@ -230,4 +230,32 @@ class GraphAppTest {
 
         assertNull(path, "Path A->D should be null");
     }
+
+    @Test
+    void graphSearchDfsExist() {
+        GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"W","X","Y","Z"});
+        app.addEdge("W","X");
+        app.addEdge("X","Y");
+        app.addEdge("Y","Z");
+
+        btflahar.asu.edu.graphDot.Path path = app.graphSearch("W","Z");
+
+        assertNotNull(path, "Path W->Z is valid");
+        assertEquals(List.of("W","X","Y","Z"), path.getNodes());
+        assertEquals("W -> X -> Y -> Z", path.toString());
+    }
+
+    @Test
+    void graphSearchDfsNullPath() {
+        GraphApp app = new GraphApp();
+
+        app.addNodes(new String[]{"W","X","Y","Z"});
+        app.addEdge("W","X"); // No edges for Z
+
+        btflahar.asu.edu.graphDot.Path path = app.graphSearch("W","Z");
+
+        assertNull(path, "Path W->Z should be null");
+    }
 }
