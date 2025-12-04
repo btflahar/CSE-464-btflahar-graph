@@ -275,6 +275,25 @@ public class GraphApp {
         return false;
     }
 
+    private Path buildPath(String srcLabel,
+                           String dstLabel,
+                           java.util.Map<String, String> parent) {
+        java.util.List<String> nodes = new java.util.ArrayList<>();
+        String step = dstLabel;
+        nodes.add(step);
+
+        while (!step.equals(srcLabel)) {
+            step = parent.get(step);
+            if (step == null) {
+                return null;
+            }
+            nodes.add(step);
+        }
+
+        java.util.Collections.reverse(nodes);
+        return new Path(nodes);
+    }
+
 
     public static void main(String[] args) throws IOException {
         GraphApp app = new GraphApp();
