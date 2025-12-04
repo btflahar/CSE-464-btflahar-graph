@@ -25,21 +25,27 @@ public class GraphApp {
         for (String line : lines) {
             line = line.trim();
 
-            if (line.contains("->")) { //check if line contains arrow for node count/splitting function
-                String[] parts = line.split("->");
-                String src = parts[0].replaceAll("[^a-zA-Z0-9]", "").trim();
-                String dst = parts[1].replaceAll("[^a-zA-Z0-9]", "").trim();
-
-                addNode(src); //add node and add edge for feature 2/3 later on.
-                addNode(dst);
-                addEdge(src, dst); //add edge for later in feature 3 next
-            }
-
-            else if (line.matches("[a-zA-Z0-9_]+;")) {
-                String node = line.replace(";", "").trim();
-                addNode(node);
+            if (line.contains("->")) {
+                parseEdgeHelper(line);
+            } else if (line.matches("[a-zA-Z0-9_]+;")) {
+                parseNodeHelper(line);
             }
         }
+    }
+
+    private void parseEdgeHelper(String line) {
+        String[] parts = line.split("->");
+        String src = parts[0].replaceAll("[^a-zA-Z0-9]", "").trim();
+        String dst = parts[1].replaceAll("[^a-zA-Z0-9]", "").trim();
+
+        addNode(src);
+        addNode(dst);
+        addEdge(src, dst);
+    }
+
+    private void parseNodeHelper(String line) {
+        String node = line.replace(";", "").trim();
+        addNode(node);
     }
 
     @Override
