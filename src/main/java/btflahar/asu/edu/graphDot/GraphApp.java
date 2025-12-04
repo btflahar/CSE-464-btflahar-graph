@@ -208,11 +208,10 @@ public class GraphApp {
         java.util.List<String> nodes = new java.util.ArrayList<>();
         String step = dstLabel;
         nodes.add(step);
+
         while (!step.equals(srcLabel)) {
             step = parent.get(step);
-            if (step == null) {
-                return null;
-            }
+            if (step == null) return null;
             nodes.add(step);
         }
         java.util.Collections.reverse(nodes);
@@ -243,9 +242,7 @@ public class GraphApp {
         nodes.add(step);
         while (!step.equals(srcLabel)) {
             step = parent.get(step);
-            if (step == null) {
-                return null;
-            }
+            if (step == null) return null;
             nodes.add(step);
         }
 
@@ -284,9 +281,7 @@ public class GraphApp {
 
         while (!step.equals(srcLabel)) {
             step = parent.get(step);
-            if (step == null) {
-                return null;
-            }
+            if (step == null) return null;
             nodes.add(step);
         }
 
