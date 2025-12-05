@@ -300,6 +300,38 @@ public class GraphApp {
         return new Path(nodes);
     }
 
+    public Path randomWalk(String srcLabel, String dstLabel, int maxSteps) {
+        if (!graph.containsVertex(srcLabel) || !graph.containsVertex(dstLabel)) {
+            return null;
+        }
+
+        java.util.Random random = new java.util.Random();
+
+        java.util.List<String> nodes = new java.util.ArrayList<>();
+        String current = srcLabel;
+        nodes.add(current);
+
+        for (int step = 0; step < maxSteps; step++) {
+            if (current.equals(dstLabel)) {
+                return new Path(nodes);
+            }
+
+            java.util.Set<DefaultEdge> edges = graph.outgoingEdgesOf(current);
+            if (edges.isEmpty()) {
+                break;
+            }
+
+            java.util.List<String> neighbors = new java.util.ArrayList<>();
+            for (DefaultEdge e : edges) {
+                neighbors.add(graph.getEdgeTarget(e));
+            }
+
+            current = neighbors.get(random.nextInt(neighbors.size()));
+            nodes.add(current);
+        }
+
+        return current.equals(dstLabel) ? new Path(nodes) : null;
+    }
 
     public static void main(String[] args) throws IOException {
         GraphApp app = new GraphApp();
@@ -308,6 +340,29 @@ public class GraphApp {
         String outputPngF = (args.length >= 2) ? args[1] : "input.png";
 
         app.parseGraph(inputDotF);
+
+        String start = "a";
+        String dest = "h";
+
+        System.out.println("BFS Execution");
+        Path bfsPath = app.graphSearch(start, dest);
+        System.out.println("Final BFS path: " + bfsPath);
+
+        System.out.println("\nDFS Execution");
+        Path dfsPath = app.graphSearch(start, dest, Algorithm.DFS);
+        System.out.println("Final DFS path: " + dfsPath);
+
+        System.out.println("\nRandom Walk Execution");
+        int maxSteps = 20;
+        for (int i = 1; i <= 5; i++) {
+            Path rw = app.randomWalk(start, dest, maxSteps);
+            if (rw == null) {
+                System.out.println("Attempt " + i + ": (dead end)");
+            } else {
+                System.out.println("Attempt " + i + ": " + rw);
+            }
+        }
+
         System.out.println(app.toString()); //.toString print in terminal
         app.outputGraph("graph-report.txt"); //output to graph file
         app.outputDOTGraph("input.dot");
