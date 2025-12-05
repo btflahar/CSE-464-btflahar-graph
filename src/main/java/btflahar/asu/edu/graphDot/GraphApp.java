@@ -185,6 +185,8 @@ public class GraphApp {
 
         while (!queue.isEmpty()) {
             String current = queue.remove();
+            Path visitingPath = buildPath(srcLabel, current, parent);
+            System.out.println("visiting " + visitingPath);
 
             if (current.equals(dstLabel)) {
                 found = true;
@@ -193,6 +195,7 @@ public class GraphApp {
 
             for (DefaultEdge e : graph.outgoingEdgesOf(current)) {
                 String neighbor = graph.getEdgeTarget(e);
+
                 if (!visited.contains(neighbor)) {
                     visited.add(neighbor);
                     parent.put(neighbor, current);
@@ -231,7 +234,7 @@ public class GraphApp {
         java.util.Set<String> visited = new java.util.HashSet<>();
         java.util.Map<String, String> parent = new java.util.HashMap<>();
 
-        boolean found = dfsVisit(srcLabel, dstLabel, visited, parent);
+        boolean found = dfsVisit(srcLabel, srcLabel, dstLabel, visited, parent);
 
         if (!found) {
             return null;
@@ -240,6 +243,7 @@ public class GraphApp {
         java.util.List<String> nodes = new java.util.ArrayList<>();
         String step = dstLabel;
         nodes.add(step);
+
         while (!step.equals(srcLabel)) {
             step = parent.get(step);
             if (step == null) return null;
@@ -250,11 +254,16 @@ public class GraphApp {
         return new Path(nodes);
     }
 
-    private boolean dfsVisit(String current,
+    private boolean dfsVisit(String srcLabel,
+                             String current,
                              String dstLabel,
                              java.util.Set<String> visited,
                              java.util.Map<String, String> parent) {
         visited.add(current);
+
+        Path visitingPath = buildPath(srcLabel, current, parent);
+        System.out.println("visiting " + visitingPath);
+
         if (current.equals(dstLabel)) {
             return true;
         }
@@ -263,7 +272,7 @@ public class GraphApp {
             String neighbor = graph.getEdgeTarget(e);
             if (!visited.contains(neighbor)) {
                 parent.put(neighbor, current);
-                if (dfsVisit(neighbor, dstLabel, visited, parent)) {
+                if (dfsVisit(srcLabel, neighbor, dstLabel, visited, parent)) {
                     return true;
                 }
             }
@@ -273,15 +282,17 @@ public class GraphApp {
     }
 
     private Path buildPath(String srcLabel,
-                           String dstLabel,
+                           String current,
                            java.util.Map<String, String> parent) {
         java.util.List<String> nodes = new java.util.ArrayList<>();
-        String step = dstLabel;
+        String step = current;
         nodes.add(step);
 
         while (!step.equals(srcLabel)) {
             step = parent.get(step);
-            if (step == null) return null;
+            if (step == null) {
+                return new Path(nodes);
+            }
             nodes.add(step);
         }
 
