@@ -1,4 +1,11 @@
-Nodes: 4
-Edges: 2
-A -> B
-B -> C
+Nodes: 8
+Edges: 9
+a -> b
+b -> c
+c -> d
+d -> a
+a -> e
+e -> f
+e -> g
+f -> h
+g -> h

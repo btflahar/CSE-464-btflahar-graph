@@ -25,21 +25,27 @@ public class GraphApp {
         for (String line : lines) {
             line = line.trim();
 
-            if (line.contains("->")) { //check if line contains arrow for node count/splitting function
-                String[] parts = line.split("->");
-                String src = parts[0].replaceAll("[^a-zA-Z0-9]", "").trim();
-                String dst = parts[1].replaceAll("[^a-zA-Z0-9]", "").trim();
-
-                addNode(src); //add node and add edge for feature 2/3 later on.
-                addNode(dst);
-                addEdge(src, dst); //add edge for later in feature 3 next
-            }
-
-            else if (line.matches("[a-zA-Z0-9_]+;")) {
-                String node = line.replace(";", "").trim();
-                addNode(node);
+            if (line.contains("->")) {
+                parseEdgeHelper(line);
+            } else if (line.matches("[a-zA-Z0-9_]+;")) {
+                parseNodeHelper(line);
             }
         }
+    }
+
+    private void parseEdgeHelper(String line) {
+        String[] parts = line.split("->");
+        String src = parts[0].replaceAll("[^a-zA-Z0-9]", "").trim();
+        String dst = parts[1].replaceAll("[^a-zA-Z0-9]", "").trim();
+
+        addNode(src);
+        addNode(dst);
+        addEdge(src, dst);
+    }
+
+    private void parseNodeHelper(String line) {
+        String node = line.replace(";", "").trim();
+        addNode(node);
     }
 
     @Override
@@ -110,67 +116,7 @@ public class GraphApp {
     }
 
     public Path graphSearch(String nodeSrc, String nodeDst) {
-        if (!graph.containsVertex(nodeSrc) || !graph.containsVertex(nodeDst)) {
-            return null; //if neither node is missing we can return null
-        }
-
-        if (nodeSrc.equals(nodeDst)) {
-            return new Path(List.of(nodeSrc));
-        }
-
-
-        java.util.Queue<String> queue = new java.util.ArrayDeque<>();
-
-        java.util.Map<String, String> parent = new java.util.HashMap<>(); //BFS
-
-        java.util.Set<String> visited = new java.util.HashSet<>(); //BFS
-
-        queue.add(nodeSrc);
-        visited.add(nodeSrc);
-
-        boolean found = false;
-
-        while (!queue.isEmpty()) {
-            String current = queue.remove();
-
-            if (current.equals(nodeDst)) {
-                found = true; //set found to true
-                break;
-            }
-
-            for (DefaultEdge edge1 : graph.outgoingEdgesOf(current)) {
-                String endEdge = graph.getEdgeTarget(edge1);
-
-                if (!visited.contains(endEdge)) {
-                    visited.add(endEdge);
-                    parent.put(endEdge, current);
-                    queue.add(endEdge);
-                }
-            }
-        }
-
-        if (!found) {
-            return null; //return null if found is never set to true
-        }
-
-
-        java.util.List<String> nodes = new java.util.ArrayList<>(); //reconstruct path using map
-
-        String next = nodeDst;
-        nodes.add(next);
-
-        while (!next.equals(nodeSrc)) {
-            next = parent.get(next);
-
-            if (next == null) {
-                return null; //null just in case
-            }
-            nodes.add(next);
-        }
-
-        java.util.Collections.reverse(nodes);
-
-        return new Path(nodes);
+        return bfsSearch(nodeSrc, nodeDst);
     }
 
     public void outputDOTGraph(String path) throws IOException {
@@ -239,6 +185,8 @@ public class GraphApp {
 
         while (!queue.isEmpty()) {
             String current = queue.remove();
+            Path visitingPath = buildPath(srcLabel, current, parent);
+            System.out.println("visiting " + visitingPath);
 
             if (current.equals(dstLabel)) {
                 found = true;
@@ -247,6 +195,7 @@ public class GraphApp {
 
             for (DefaultEdge e : graph.outgoingEdgesOf(current)) {
                 String neighbor = graph.getEdgeTarget(e);
+
                 if (!visited.contains(neighbor)) {
                     visited.add(neighbor);
                     parent.put(neighbor, current);
@@ -262,11 +211,10 @@ public class GraphApp {
         java.util.List<String> nodes = new java.util.ArrayList<>();
         String step = dstLabel;
         nodes.add(step);
+
         while (!step.equals(srcLabel)) {
             step = parent.get(step);
-            if (step == null) {
-                return null;
-            }
+            if (step == null) return null;
             nodes.add(step);
         }
         java.util.Collections.reverse(nodes);
@@ -286,7 +234,7 @@ public class GraphApp {
         java.util.Set<String> visited = new java.util.HashSet<>();
         java.util.Map<String, String> parent = new java.util.HashMap<>();
 
-        boolean found = dfsVisit(srcLabel, dstLabel, visited, parent);
+        boolean found = dfsVisit(srcLabel, srcLabel, dstLabel, visited, parent);
 
         if (!found) {
             return null;
@@ -295,11 +243,10 @@ public class GraphApp {
         java.util.List<String> nodes = new java.util.ArrayList<>();
         String step = dstLabel;
         nodes.add(step);
+
         while (!step.equals(srcLabel)) {
             step = parent.get(step);
-            if (step == null) {
-                return null;
-            }
+            if (step == null) return null;
             nodes.add(step);
         }
 
@@ -307,11 +254,16 @@ public class GraphApp {
         return new Path(nodes);
     }
 
-    private boolean dfsVisit(String current,
+    private boolean dfsVisit(String srcLabel,
+                             String current,
                              String dstLabel,
                              java.util.Set<String> visited,
                              java.util.Map<String, String> parent) {
         visited.add(current);
+
+        Path visitingPath = buildPath(srcLabel, current, parent);
+        System.out.println("visiting " + visitingPath);
+
         if (current.equals(dstLabel)) {
             return true;
         }
@@ -320,7 +272,7 @@ public class GraphApp {
             String neighbor = graph.getEdgeTarget(e);
             if (!visited.contains(neighbor)) {
                 parent.put(neighbor, current);
-                if (dfsVisit(neighbor, dstLabel, visited, parent)) {
+                if (dfsVisit(srcLabel, neighbor, dstLabel, visited, parent)) {
                     return true;
                 }
             }
@@ -329,6 +281,57 @@ public class GraphApp {
         return false;
     }
 
+    private Path buildPath(String srcLabel,
+                           String current,
+                           java.util.Map<String, String> parent) {
+        java.util.List<String> nodes = new java.util.ArrayList<>();
+        String step = current;
+        nodes.add(step);
+
+        while (!step.equals(srcLabel)) {
+            step = parent.get(step);
+            if (step == null) {
+                return new Path(nodes);
+            }
+            nodes.add(step);
+        }
+
+        java.util.Collections.reverse(nodes);
+        return new Path(nodes);
+    }
+
+    public Path randomWalk(String srcLabel, String dstLabel, int maxSteps) {
+        if (!graph.containsVertex(srcLabel) || !graph.containsVertex(dstLabel)) {
+            return null;
+        }
+
+        java.util.Random random = new java.util.Random();
+
+        java.util.List<String> nodes = new java.util.ArrayList<>();
+        String current = srcLabel;
+        nodes.add(current);
+
+        for (int step = 0; step < maxSteps; step++) {
+            if (current.equals(dstLabel)) {
+                return new Path(nodes);
+            }
+
+            java.util.Set<DefaultEdge> edges = graph.outgoingEdgesOf(current);
+            if (edges.isEmpty()) {
+                break;
+            }
+
+            java.util.List<String> neighbors = new java.util.ArrayList<>();
+            for (DefaultEdge e : edges) {
+                neighbors.add(graph.getEdgeTarget(e));
+            }
+
+            current = neighbors.get(random.nextInt(neighbors.size()));
+            nodes.add(current);
+        }
+
+        return current.equals(dstLabel) ? new Path(nodes) : null;
+    }
 
     public static void main(String[] args) throws IOException {
         GraphApp app = new GraphApp();
@@ -337,6 +340,29 @@ public class GraphApp {
         String outputPngF = (args.length >= 2) ? args[1] : "input.png";
 
         app.parseGraph(inputDotF);
+
+        String start = "a";
+        String dest = "h";
+
+        System.out.println("BFS Execution");
+        Path bfsPath = app.graphSearch(start, dest);
+        System.out.println("Final BFS path: " + bfsPath);
+
+        System.out.println("\nDFS Execution");
+        Path dfsPath = app.graphSearch(start, dest, Algorithm.DFS);
+        System.out.println("Final DFS path: " + dfsPath);
+
+        System.out.println("\nRandom Walk Execution");
+        int maxSteps = 20;
+        for (int i = 1; i <= 5; i++) {
+            Path rw = app.randomWalk(start, dest, maxSteps);
+            if (rw == null) {
+                System.out.println("Attempt " + i + ": (dead end)");
+            } else {
+                System.out.println("Attempt " + i + ": " + rw);
+            }
+        }
+
         System.out.println(app.toString()); //.toString print in terminal
         app.outputGraph("graph-report.txt"); //output to graph file
         app.outputDOTGraph("input.dot");
