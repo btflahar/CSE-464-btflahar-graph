@@ -1,12 +1,4 @@
 digraph G {
-  a;
-  b;
-  c;
-  d;
-  e;
-  f;
-  g;
-  h;
   a -> b;
   b -> c;
   c -> d;

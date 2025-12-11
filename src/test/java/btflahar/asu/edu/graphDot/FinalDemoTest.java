@@ -1,13 +1,17 @@
 package btflahar.asu.edu.graphDot;
+
 import org.junit.jupiter.api.Test;
 
 public class FinalDemoTest {
+
     @Test
-    public void demoALlFunctions() throws Exception {
+    public void demoAllFunctions() throws Exception {
+
         GraphApp app = new GraphApp();
 
         String inputDotFile = "input.dot";
         app.parseGraph(inputDotFile);
+
         String start = "a";
         String dest  = "h";
 
@@ -20,17 +24,15 @@ public class FinalDemoTest {
         System.out.println("Final DFS path: " + dfsPath);
 
         System.out.println("\nRandom Walk Execution");
-        int maxSteps = 20;
 
-        for (int i = 1; i <= 5; i++) {
-            Path rw = app.randomWalk(start, dest, maxSteps);
+        for (int i = 1; i <= 10; i++) {
+            Path rw = app.graphSearch(start, dest, Algorithm.RANDOM_WALK);
+
             if (rw == null) {
-                System.out.println("Random Walk #" + i + ": (max steps)");
-            }
-            else {
+                System.out.println("Random Walk #" + i + ": (dead end)");
+            } else {
                 System.out.println("Random Walk #" + i + ": " + rw);
             }
         }
     }
-
 }
